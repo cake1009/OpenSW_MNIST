@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 import random
 import matplotlib.pyplot as plt
 tf.set_random_seed(777)
@@ -20,8 +21,8 @@ b2 = tf.Variable(tf.random_normal([nb_classes]))
 X2 = tf.nn.relu(tf.matmul(X1, W1) + b1)
 hypothesis = tf.nn.softmax(tf.sigmoid(tf.matmul(X2, W2) + b2))
 
-cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(hypothesis), axis=1))
-optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+cost = tf.reduce_mean(tf.square(hypothesis - Y))
+optimizer = tf.train.AdamOptimizer(learning_rate = 0.01).minimize(cost)
 
 is_correct = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
