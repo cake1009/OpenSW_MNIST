@@ -21,14 +21,16 @@ X2 = tf.nn.relu(tf.matmul(X1, W1) + b1)
 hypothesis = tf.nn.softmax(tf.sigmoid(tf.matmul(X2, W2) + b2))
 
 cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(hypothesis), axis=1))
-optimizer = tf.train.GradientDescentOptimizer(learning_rate=10).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
 is_correct = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
 
 training_epochs = 15
 batch_size = 100
+saver = tf.train.Saver()
 
+min_loss = 10000
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
 
@@ -42,10 +44,21 @@ with tf.Session() as sess:
             avg_cost += c / total_batch
 
         print('Epoch : %04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+        
+        acc, loss = sess.run([accuracy, cost], feed_dict = {X1: mnist.validation.images, Y: mnist.validation.labels})
+        print("validation acc : {:.2%}, loss : {:.5f}".format(acc, loss))
+        if min_loss > loss:
+            min_loss = loss
+            saver.save(sess, "./save.ckpt")
+            print("Session saved")
+        print("")
 
     print("Learning finished")
 
-    print('Accuracy:', sess.run(accuracy, feed_dict={X: mnist.test.images, Y: mnist.test.labels, keep_prob: 1}))
+    saver.restore(sess, "./save.ckpt")
+    print("Train Accuracy: {:.2%}".format(accuracy.eval(session=sess, feed_dict={X1: mnist.train.images, Y: mnist.train.labels})))
+    print("Valid Accuracy: {:.2%}".format(accuracy.eval(session=sess, feed_dict={X1: mnist.validation.images, Y: mnist.validation.labels})))
+    print("Test Accuracy: {:.2%}".format(accuracy.eval(session=sess, feed_dict={X1: mnist.test.images, Y: mnist.test.labels})))
 
     r = random.randint(0, mnist.test.num_examples - 1)
     print("Label: ", sess.run(tf.argmax(mnist.test.labels[r:r + 1], 1)))
