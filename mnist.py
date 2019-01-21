@@ -1,3 +1,13 @@
+'''
+
+Author : Dong Gyu Bae, sum19@naver.com
+
+Supervisor : Na, In Seop, ypencil@hanmail.net
+
+Starting Project : 2019.1.4
+
+'''
+
 import tensorflow as tf
 import random
 from tensorflow.examples.tutorials.mnist import input_data
